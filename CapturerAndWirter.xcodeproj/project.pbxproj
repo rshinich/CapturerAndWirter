@@ -16,6 +16,8 @@
 		9FF72DE32C9826A0003B6EF6 /* CapturerAndWirterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72DE22C9826A0003B6EF6 /* CapturerAndWirterTests.swift */; };
 		9FF72DED2C9826A0003B6EF6 /* CapturerAndWirterUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72DEC2C9826A0003B6EF6 /* CapturerAndWirterUITests.swift */; };
 		9FF72DEF2C9826A0003B6EF6 /* CapturerAndWirterUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72DEE2C9826A0003B6EF6 /* CapturerAndWirterUITestsLaunchTests.swift */; };
+		9FF72DFE2C98296D003B6EF6 /* Capturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72DFD2C98296D003B6EF6 /* Capturer.swift */; };
+		9FF72E002C982B5D003B6EF6 /* CapturerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72DFF2C982B5D003B6EF6 /* CapturerViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +51,8 @@
 		9FF72DE82C9826A0003B6EF6 /* CapturerAndWirterUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CapturerAndWirterUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9FF72DEC2C9826A0003B6EF6 /* CapturerAndWirterUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturerAndWirterUITests.swift; sourceTree = "<group>"; };
 		9FF72DEE2C9826A0003B6EF6 /* CapturerAndWirterUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturerAndWirterUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		9FF72DFD2C98296D003B6EF6 /* Capturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Capturer.swift; sourceTree = "<group>"; };
+		9FF72DFF2C982B5D003B6EF6 /* CapturerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturerViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,9 +103,11 @@
 		9FF72DCA2C98269F003B6EF6 /* CapturerAndWirter */ = {
 			isa = PBXGroup;
 			children = (
+				9FF72DFC2C982956003B6EF6 /* Capturer */,
 				9FF72DCB2C98269F003B6EF6 /* AppDelegate.swift */,
 				9FF72DCD2C98269F003B6EF6 /* SceneDelegate.swift */,
 				9FF72DCF2C98269F003B6EF6 /* ViewController.swift */,
+				9FF72DFF2C982B5D003B6EF6 /* CapturerViewController.swift */,
 				9FF72DD12C98269F003B6EF6 /* Main.storyboard */,
 				9FF72DD42C9826A0003B6EF6 /* Assets.xcassets */,
 				9FF72DD62C9826A0003B6EF6 /* LaunchScreen.storyboard */,
@@ -125,6 +131,14 @@
 				9FF72DEE2C9826A0003B6EF6 /* CapturerAndWirterUITestsLaunchTests.swift */,
 			);
 			path = CapturerAndWirterUITests;
+			sourceTree = "<group>";
+		};
+		9FF72DFC2C982956003B6EF6 /* Capturer */ = {
+			isa = PBXGroup;
+			children = (
+				9FF72DFD2C98296D003B6EF6 /* Capturer.swift */,
+			);
+			path = Capturer;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -261,6 +275,8 @@
 				9FF72DD02C98269F003B6EF6 /* ViewController.swift in Sources */,
 				9FF72DCC2C98269F003B6EF6 /* AppDelegate.swift in Sources */,
 				9FF72DCE2C98269F003B6EF6 /* SceneDelegate.swift in Sources */,
+				9FF72DFE2C98296D003B6EF6 /* Capturer.swift in Sources */,
+				9FF72E002C982B5D003B6EF6 /* CapturerViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -445,11 +461,14 @@
 				DEVELOPMENT_TEAM = 268X49LNSH;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CapturerAndWirter/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Use camera to capturer";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Use microphone to capturer";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -473,11 +492,14 @@
 				DEVELOPMENT_TEAM = 268X49LNSH;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CapturerAndWirter/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Use camera to capturer";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Use microphone to capturer";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
