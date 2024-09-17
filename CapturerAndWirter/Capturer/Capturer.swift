@@ -41,6 +41,30 @@ class Capturer: NSObject {
     public var onVideoSampleBuffer: ((_ sampleBuffer: CMSampleBuffer) -> Void)?
     public var onAudioSampleBuffer: ((_ sampleBuffer: CMSampleBuffer) -> Void)?
 
+    // MARK: -
+
+    public class func getSupportDevices() {
+
+        let deviceTypes: [AVCaptureDevice.DeviceType] = [
+            .builtInWideAngleCamera, // 广角摄像头
+            .builtInTelephotoCamera, // 长焦摄像头
+            .builtInUltraWideCamera, // 超广角摄像头
+            .builtInDualCamera,      // 双摄像头
+            .builtInDualWideCamera,  // 双广角摄像头
+            .builtInTripleCamera,    // 三摄像头
+            .builtInTrueDepthCamera, // 景深摄像头(支持Face ID的摄像头) 主要用于需要捕捉FaceID的建模，或者类似Animoji之类的情况
+        ]
+
+        let position: AVCaptureDevice.Position = .unspecified
+
+        let discoverySessions = AVCaptureDevice.DiscoverySession(deviceTypes: deviceTypes,
+                                                                 mediaType: .video,
+                                                                 position: position)
+
+        for device in discoverySessions.devices {
+            print("discoverySession = \(device)")
+        }
+    }
 
     // MARK: -
 
@@ -257,7 +281,9 @@ class Capturer: NSObject {
 
         do {
             try self.videoDeviceInput.device.lockForConfiguration()
-            self.videoDeviceInput.videoMinFrameDurationOverride = CMTimeMake(value: 1, timescale: fps)
+//            self.videoDeviceInput.videoMinFrameDurationOverride = CMTimeMake(value: 1, timescale: fps)
+            self.videoDeviceInput.device.activeVideoMaxFrameDuration = CMTimeMake(value: 1, timescale: fps)
+            self.videoDeviceInput.device.activeVideoMinFrameDuration = CMTimeMake(value: 1, timescale: fps)
             self.videoDeviceInput.device.unlockForConfiguration()
         } catch {
             print("UpdateVideoFPS failed with \(error)")
@@ -314,6 +340,21 @@ class Capturer: NSObject {
 
     }
 
+    // MARK: - Snapshot
+
+    private(set) var snapshotVideoBuffer: CMSampleBuffer?
+    private(set) var currentVideoBuffer: CMSampleBuffer?
+
+    public func doSnapshotVideoBuffer() {
+
+        self.snapshotVideoBuffer = self.currentVideoBuffer
+    }
+
+    public func getSnapshotVideoBuffer() -> CMSampleBuffer? {
+
+        return self.snapshotVideoBuffer
+    }
+
 
     // MARK: - DeviceRotationCoordinator
 
@@ -341,6 +382,7 @@ extension Capturer: AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAudio
 
         if output == self.videoOutput {
 
+            self.currentVideoBuffer = sampleBuffer
             self.onVideoSampleBuffer?(sampleBuffer)
 
         } else if output == self.audioOutput {

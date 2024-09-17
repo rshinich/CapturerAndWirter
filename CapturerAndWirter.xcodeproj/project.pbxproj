@@ -18,6 +18,7 @@
 		9FF72DEF2C9826A0003B6EF6 /* CapturerAndWirterUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72DEE2C9826A0003B6EF6 /* CapturerAndWirterUITestsLaunchTests.swift */; };
 		9FF72DFE2C98296D003B6EF6 /* Capturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72DFD2C98296D003B6EF6 /* Capturer.swift */; };
 		9FF72E002C982B5D003B6EF6 /* CapturerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72DFF2C982B5D003B6EF6 /* CapturerViewController.swift */; };
+		9FF72E032C98841C003B6EF6 /* VideoWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72E022C98841C003B6EF6 /* VideoWriter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +54,7 @@
 		9FF72DEE2C9826A0003B6EF6 /* CapturerAndWirterUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturerAndWirterUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		9FF72DFD2C98296D003B6EF6 /* Capturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Capturer.swift; sourceTree = "<group>"; };
 		9FF72DFF2C982B5D003B6EF6 /* CapturerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturerViewController.swift; sourceTree = "<group>"; };
+		9FF72E022C98841C003B6EF6 /* VideoWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoWriter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +105,7 @@
 		9FF72DCA2C98269F003B6EF6 /* CapturerAndWirter */ = {
 			isa = PBXGroup;
 			children = (
+				9FF72E012C988407003B6EF6 /* VideoWriter */,
 				9FF72DFC2C982956003B6EF6 /* Capturer */,
 				9FF72DCB2C98269F003B6EF6 /* AppDelegate.swift */,
 				9FF72DCD2C98269F003B6EF6 /* SceneDelegate.swift */,
@@ -139,6 +142,14 @@
 				9FF72DFD2C98296D003B6EF6 /* Capturer.swift */,
 			);
 			path = Capturer;
+			sourceTree = "<group>";
+		};
+		9FF72E012C988407003B6EF6 /* VideoWriter */ = {
+			isa = PBXGroup;
+			children = (
+				9FF72E022C98841C003B6EF6 /* VideoWriter.swift */,
+			);
+			path = VideoWriter;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -276,6 +287,7 @@
 				9FF72DCC2C98269F003B6EF6 /* AppDelegate.swift in Sources */,
 				9FF72DCE2C98269F003B6EF6 /* SceneDelegate.swift in Sources */,
 				9FF72DFE2C98296D003B6EF6 /* Capturer.swift in Sources */,
+				9FF72E032C98841C003B6EF6 /* VideoWriter.swift in Sources */,
 				9FF72E002C982B5D003B6EF6 /* CapturerViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
