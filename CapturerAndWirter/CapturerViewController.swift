@@ -12,7 +12,7 @@ import Foundation
 class CapturerViewController: UIViewController {
 
     let capturer: Capturer = Capturer(fps: 30, preset: .hd1280x720)
-    let writer: VideoWriter = VideoWriter(videoSize: CGSize(width: 1280, height: 720))
+    var writer: VideoWriter?
 
     let cameraView = UIView()
     let returnBtn = UIButton()
@@ -34,6 +34,7 @@ class CapturerViewController: UIViewController {
         self.setupCapturer()
         self.setupView()
         self.setupNotification()
+        self.handleDeviceOrientationChange()
     }
 
     private func setupCapturer() {
@@ -56,16 +57,16 @@ class CapturerViewController: UIViewController {
 
         self.capturer.onVideoSampleBuffer = { [weak self] videoSampleBuffer in
 
-            if self?.writer.isRecording ?? false {
-                self?.writer.appendVideoSampleBuffer(videoSampleBuffer)
+            if self?.writer?.isRecording ?? false {
+                self?.writer?.appendVideoSampleBuffer(videoSampleBuffer)
             }
 
         }
 
         self.capturer.onAudioSampleBuffer = { [weak self] audioSampleBuffer in
 
-            if self?.writer.isRecording ?? false {
-                self?.writer.appendAudioSampleBuffer(audioSampleBuffer)
+            if self?.writer?.isRecording ?? false {
+                self?.writer?.appendAudioSampleBuffer(audioSampleBuffer)
             }
         }
     }
@@ -112,7 +113,11 @@ class CapturerViewController: UIViewController {
 
         let startSessionSourceTime = CMSampleBufferGetPresentationTimeStamp(currentVideoBuffer)
 
-        self.writer.startRecording(outputURL: fullURL, startSessionSourceTime: startSessionSourceTime) { error in
+        guard let pixelBuffer = CMSampleBufferGetImageBuffer(currentVideoBuffer) else { return }
+
+        self.writer = VideoWriter(videoSize: CGSize(width: CVPixelBufferGetWidth(pixelBuffer), height: CVPixelBufferGetHeight(pixelBuffer)))
+
+        self.writer?.startRecording(outputURL: fullURL, startSessionSourceTime: startSessionSourceTime) { error in
 
             if error == nil {
                 print("start recording in \(fullURL)")
@@ -124,7 +129,7 @@ class CapturerViewController: UIViewController {
 
     private func stopRecording() {
 
-        self.writer.stopRecording { error in
+        self.writer?.stopRecording { error in
 
             if error == nil {
                 print("stop recording")
@@ -142,7 +147,7 @@ class CapturerViewController: UIViewController {
 
     @objc func recordBtnClciked() {
 
-        if self.writer.isRecording {
+        if self.writer?.isRecording ?? false {
             self.stopRecording()
         } else {
             self.startRecording()
@@ -154,10 +159,13 @@ class CapturerViewController: UIViewController {
         switch orientation {
         case .portrait:
             print("设备现在是竖屏模式")
+//            self.capturer.updatePreviewVideoOrientation(videoOrientation: .portrait)
         case .landscapeLeft:
             print("设备现在是左横屏模式")
+//            self.capturer.updatePreviewVideoOrientation(videoOrientation: .landscapeLeft)
         case .landscapeRight:
             print("设备现在是右横屏模式")
+//            self.capturer.updatePreviewVideoOrientation(videoOrientation: .landscapeRight)
         case .portraitUpsideDown:
             print("设备现在是倒立竖屏模式")
         case .faceUp:

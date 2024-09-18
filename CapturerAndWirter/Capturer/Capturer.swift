@@ -203,6 +203,21 @@ class Capturer: NSObject {
         self.session.addOutput(self.videoOutput)
         self.videoOutput.setSampleBufferDelegate(self, queue: self.videoOutputQueue)
 
+        // 设置横竖屏
+
+        if let videoConnection = self.videoOutput.connection(with: .video) {
+            // 根据设备的当前方向设置视频方向
+            if UIDevice.current.orientation == .portrait {
+                videoConnection.videoOrientation = .portrait
+            } else if UIDevice.current.orientation == .landscapeRight {
+                videoConnection.videoOrientation = .landscapeRight
+            } else if UIDevice.current.orientation == .landscapeLeft {
+                videoConnection.videoOrientation = .landscapeLeft
+            } else if UIDevice.current.orientation == .portraitUpsideDown {
+                videoConnection.videoOrientation = .portraitUpsideDown
+            }
+        }
+
     }
 
     private func addAudioOutput() {
@@ -337,6 +352,8 @@ class Capturer: NSObject {
     public func updatePreviewVideoOrientation(videoOrientation: AVCaptureVideoOrientation) {
 
         self.previewLayer?.connection?.videoOrientation = videoOrientation
+
+
 
     }
 
