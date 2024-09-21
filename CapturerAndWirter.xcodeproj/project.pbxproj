@@ -19,6 +19,7 @@
 		9FF72DFE2C98296D003B6EF6 /* Capturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72DFD2C98296D003B6EF6 /* Capturer.swift */; };
 		9FF72E002C982B5D003B6EF6 /* CapturerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72DFF2C982B5D003B6EF6 /* CapturerViewController.swift */; };
 		9FF72E032C98841C003B6EF6 /* VideoWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72E022C98841C003B6EF6 /* VideoWriter.swift */; };
+		9FF72E052C9EB0B3003B6EF6 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 9FF72E042C9EB0B3003B6EF6 /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +56,7 @@
 		9FF72DFD2C98296D003B6EF6 /* Capturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Capturer.swift; sourceTree = "<group>"; };
 		9FF72DFF2C982B5D003B6EF6 /* CapturerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturerViewController.swift; sourceTree = "<group>"; };
 		9FF72E022C98841C003B6EF6 /* VideoWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoWriter.swift; sourceTree = "<group>"; };
+		9FF72E042C9EB0B3003B6EF6 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +87,7 @@
 		9FF72DBF2C98269F003B6EF6 = {
 			isa = PBXGroup;
 			children = (
+				9FF72E042C9EB0B3003B6EF6 /* README.md */,
 				9FF72DCA2C98269F003B6EF6 /* CapturerAndWirter */,
 				9FF72DE12C9826A0003B6EF6 /* CapturerAndWirterTests */,
 				9FF72DEB2C9826A0003B6EF6 /* CapturerAndWirterUITests */,
@@ -258,6 +261,7 @@
 			files = (
 				9FF72DD52C9826A0003B6EF6 /* Assets.xcassets in Resources */,
 				9FF72DD82C9826A0003B6EF6 /* Base in Resources */,
+				9FF72E052C9EB0B3003B6EF6 /* README.md in Resources */,
 				9FF72DD32C98269F003B6EF6 /* Base in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
