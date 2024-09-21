@@ -111,20 +111,21 @@ class CapturerViewController: UIViewController {
 
         guard let currentVideoBuffer = self.capturer.currentVideoBuffer else { return }
 
-        let startSessionSourceTime = CMSampleBufferGetPresentationTimeStamp(currentVideoBuffer)
-
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(currentVideoBuffer) else { return }
 
-        self.writer = VideoWriter(videoSize: CGSize(width: CVPixelBufferGetWidth(pixelBuffer), height: CVPixelBufferGetHeight(pixelBuffer)))
-
-        self.writer?.startRecording(outputURL: fullURL, startSessionSourceTime: startSessionSourceTime) { error in
-
+        self.writer = VideoWriter(outputURL: fullURL, videoSize: CGSize(width: CVPixelBufferGetWidth(pixelBuffer), height: CVPixelBufferGetHeight(pixelBuffer)), completion: { error in
             if error == nil {
                 print("start recording in \(fullURL)")
             } else {
                 print("start recording with error \(error)")
             }
-        }
+        })
+
+        guard let currentVideoBuffer = self.capturer.currentVideoBuffer else { return }
+
+        let startSessionSourceTime = CMSampleBufferGetPresentationTimeStamp(currentVideoBuffer)
+
+        self.writer?.startRecording(startSessionSourceTime: startSessionSourceTime)
     }
 
     private func stopRecording() {
@@ -155,17 +156,20 @@ class CapturerViewController: UIViewController {
     }
 
     @objc func handleDeviceOrientationChange() {
+
+        guard self.writer?.isRecording != true else { return }
+
         let orientation = UIDevice.current.orientation
         switch orientation {
         case .portrait:
             print("设备现在是竖屏模式")
-//            self.capturer.updatePreviewVideoOrientation(videoOrientation: .portrait)
+            self.capturer.updatePreviewVideoOrientation(videoOrientation: .portrait)
         case .landscapeLeft:
             print("设备现在是左横屏模式")
-//            self.capturer.updatePreviewVideoOrientation(videoOrientation: .landscapeLeft)
+            self.capturer.updatePreviewVideoOrientation(videoOrientation: .landscapeRight)
         case .landscapeRight:
             print("设备现在是右横屏模式")
-//            self.capturer.updatePreviewVideoOrientation(videoOrientation: .landscapeRight)
+            self.capturer.updatePreviewVideoOrientation(videoOrientation: .landscapeLeft)
         case .portraitUpsideDown:
             print("设备现在是倒立竖屏模式")
         case .faceUp:

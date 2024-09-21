@@ -351,9 +351,11 @@ class Capturer: NSObject {
 
     public func updatePreviewVideoOrientation(videoOrientation: AVCaptureVideoOrientation) {
 
-        self.previewLayer?.connection?.videoOrientation = videoOrientation
+//        self.previewLayer?.connection?.videoOrientation = videoOrientation
 
-
+        if let videoConnection = self.videoOutput.connection(with: .video) {
+            videoConnection.videoOrientation = videoOrientation
+        }
 
     }
 

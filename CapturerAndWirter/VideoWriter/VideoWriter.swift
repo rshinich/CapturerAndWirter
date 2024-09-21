@@ -16,14 +16,9 @@ class VideoWriter {
     private var videoPixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor?
 
     private(set) var isRecording = false
-    private var videoSize: CGSize
 
-    init(videoSize: CGSize) {
-        self.videoSize = videoSize
-    }
+    init(outputURL: URL, videoSize: CGSize, completion: @escaping (Error?) -> Void) {
 
-    // 开始录制
-    func startRecording(outputURL: URL, startSessionSourceTime: CMTime, completion: @escaping (Error?) -> Void) {
         do {
             // 初始化 AVAssetWriter
             assetWriter = try AVAssetWriter(outputURL: outputURL, fileType: .mov)
@@ -61,15 +56,19 @@ class VideoWriter {
                 assetWriter?.add(audioInput)
             }
 
-            // 开始写入会话
-            assetWriter?.startWriting()
-            assetWriter?.startSession(atSourceTime: startSessionSourceTime)
-            isRecording = true
-
             completion(nil)
         } catch {
             completion(error)
         }
+
+    }
+
+    // 开始录制
+    func startRecording(startSessionSourceTime: CMTime) {
+        // 开始写入会话
+        assetWriter?.startWriting()
+        assetWriter?.startSession(atSourceTime: startSessionSourceTime)
+        isRecording = true
     }
 
     // 添加视频帧
