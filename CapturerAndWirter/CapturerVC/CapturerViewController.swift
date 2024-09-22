@@ -16,7 +16,10 @@ class CapturerViewController: UIViewController {
 
     let cameraView = UIView()
     let returnBtn = UIButton()
-    let recordBtn = UIButton()
+    var recordBtn: RecordButton?
+    var cameraSelectBtn: CameraSelectButton?
+    var parametersBtn: ParametersButton?
+    var ruleScorllView: RulerScrollView?
 
     // MARK: -
 
@@ -26,6 +29,10 @@ class CapturerViewController: UIViewController {
 
     override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
         return .portrait    // 设置默认方向为竖屏
+    }
+
+    override var prefersStatusBarHidden: Bool {
+        return true  // 返回 true 表示隐藏状态栏，false 表示显示状态栏
     }
 
     override func viewDidLoad() {
@@ -82,12 +89,26 @@ class CapturerViewController: UIViewController {
         self.view.addSubview(self.returnBtn)
         self.returnBtn.setImage(UIImage.init(systemName: "x.circle.fill"), for: .normal)
         self.returnBtn.addTarget(self, action: #selector(returnBtnClicked), for: .touchUpInside)
-        self.returnBtn.frame = CGRect(x: 10, y: 50, width: 44, height: 44)
+        self.returnBtn.frame = CGRect(x: 10, y: 100, width: 44, height: 44)
 
-        self.view.addSubview(self.recordBtn)
-        self.recordBtn.setImage(UIImage.init(systemName: "stop.circle"), for: .normal)
-        self.recordBtn.addTarget(self, action: #selector(recordBtnClciked), for: .touchUpInside)
-        self.recordBtn.frame = CGRect(x: self.view.bounds.midX - 50, y: self.view.bounds.maxY - 200, width: 100, height: 100)
+        self.recordBtn = RecordButton(frame: CGRect(x: self.view.bounds.midX - 40, y: self.view.bounds.maxY - 180, width: 80, height: 80))
+        self.view.addSubview(self.recordBtn!)
+        self.recordBtn!.addTarget(self, action: #selector(recordBtnClciked), for: .touchUpInside)
+
+        let y = (UIScreen.main.bounds.height/2.0 + UIScreen.main.bounds.width * 16.0 / 9.0 / 2.0)
+        let ruler = RulerScrollView(frame: CGRect(x: 0, y: y, width: UIScreen.main.bounds.width, height: 40), numberOfMarks: 100, majorMarkInterval: 10)
+        self.view.addSubview(ruler)
+        self.ruleScorllView = ruler
+
+        let cameraSelectBtn = CameraSelectButton(frame: CGRect(x: 10, y: 30, width: 44, height: 44))
+        cameraSelectBtn.addTarget(self, action: #selector(cameraSelectBtnClicked), for: .touchUpInside)
+        self.view.addSubview(cameraSelectBtn)
+        self.cameraSelectBtn = cameraSelectBtn
+
+        let parametersBtn = ParametersButton(frame: CGRect(x: UIScreen.main.bounds.width - 110, y: 30, width: 100, height: 44))
+        parametersBtn.addTarget(self, action: #selector(parametersBtnClicked), for: .touchUpInside)
+        self.view.addSubview(parametersBtn)
+        self.parametersBtn = parametersBtn
     }
 
     private func setupNotification() {
@@ -149,37 +170,66 @@ class CapturerViewController: UIViewController {
     @objc func recordBtnClciked() {
 
         if self.writer?.isRecording ?? false {
+            self.recordBtn?.stopRecordingAnimation()
             self.stopRecording()
         } else {
+            self.recordBtn?.startRecordingAnimation()
             self.startRecording()
         }
+    }
+
+    @objc func cameraSelectBtnClicked() {
+
+        let cameraSelectView = CameraSelectMenuView(frame: CGRect(x: 10, y: 100, width: 200, height: 300))
+        self.view.addSubview(cameraSelectView)
+    }
+
+    @objc func parametersBtnClicked() {
+
     }
 
     @objc func handleDeviceOrientationChange() {
 
         guard self.writer?.isRecording != true else { return }
 
+        var angle: CGFloat = 0
+
         let orientation = UIDevice.current.orientation
         switch orientation {
         case .portrait:
             print("设备现在是竖屏模式")
             self.capturer.updatePreviewVideoOrientation(videoOrientation: .portrait)
+            angle = 0
         case .landscapeLeft:
             print("设备现在是左横屏模式")
             self.capturer.updatePreviewVideoOrientation(videoOrientation: .landscapeRight)
+            angle = .pi/2
         case .landscapeRight:
             print("设备现在是右横屏模式")
             self.capturer.updatePreviewVideoOrientation(videoOrientation: .landscapeLeft)
+            angle = -.pi/2
         case .portraitUpsideDown:
             print("设备现在是倒立竖屏模式")
+            return
         case .faceUp:
             print("设备现在是平放屏幕朝上")
+            return
         case .faceDown:
             print("设备现在是平放屏幕朝下")
+            return
         case .unknown:
             print("未知设备方向")
+            return
         @unknown default:
             print("新设备方向")
+            return
         }
+
+        UIView.animate(withDuration: 0.3) {
+            self.cameraSelectBtn?.transformRotation(angle: angle)
+            self.parametersBtn?.transformRotation(angle: angle)
+            self.ruleScorllView?.transformRotation(angle: angle)
+        }
+
     }
 }

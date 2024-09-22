@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9F9DF9D62C9ED4F500649E4F /* RecordButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F9DF9D52C9ED4F500649E4F /* RecordButton.swift */; };
+		9F9DF9D92C9FD0BF00649E4F /* RluerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F9DF9D82C9FD0BF00649E4F /* RluerView.swift */; };
+		9F9DF9DB2C9FD0D400649E4F /* RulerScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F9DF9DA2C9FD0D400649E4F /* RulerScrollView.swift */; };
+		9F9DF9DD2C9FFD8200649E4F /* CameraSelectButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F9DF9DC2C9FFD8200649E4F /* CameraSelectButton.swift */; };
+		9F9DF9DF2CA045C900649E4F /* ParametersButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F9DF9DE2CA045C900649E4F /* ParametersButton.swift */; };
+		9F9DF9E12CA0520B00649E4F /* CameraSelectMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F9DF9E02CA0520B00649E4F /* CameraSelectMenuView.swift */; };
+		9F9DF9E32CA0530200649E4F /* CameraSelectMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F9DF9E22CA0530200649E4F /* CameraSelectMenuItem.swift */; };
 		9FF72DCC2C98269F003B6EF6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72DCB2C98269F003B6EF6 /* AppDelegate.swift */; };
 		9FF72DCE2C98269F003B6EF6 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72DCD2C98269F003B6EF6 /* SceneDelegate.swift */; };
 		9FF72DD02C98269F003B6EF6 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72DCF2C98269F003B6EF6 /* ViewController.swift */; };
@@ -40,6 +47,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		9F9DF9D52C9ED4F500649E4F /* RecordButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordButton.swift; sourceTree = "<group>"; };
+		9F9DF9D82C9FD0BF00649E4F /* RluerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RluerView.swift; sourceTree = "<group>"; };
+		9F9DF9DA2C9FD0D400649E4F /* RulerScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulerScrollView.swift; sourceTree = "<group>"; };
+		9F9DF9DC2C9FFD8200649E4F /* CameraSelectButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraSelectButton.swift; sourceTree = "<group>"; };
+		9F9DF9DE2CA045C900649E4F /* ParametersButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParametersButton.swift; sourceTree = "<group>"; };
+		9F9DF9E02CA0520B00649E4F /* CameraSelectMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CameraSelectMenuView.swift; path = CapturerAndWirter/CapturerVC/CameraSelectMenuView.swift; sourceTree = SOURCE_ROOT; };
+		9F9DF9E22CA0530200649E4F /* CameraSelectMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraSelectMenuItem.swift; sourceTree = "<group>"; };
 		9FF72DC82C98269F003B6EF6 /* CapturerAndWirter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CapturerAndWirter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9FF72DCB2C98269F003B6EF6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9FF72DCD2C98269F003B6EF6 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -84,6 +98,29 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9F9DF9D22C9ED4C000649E4F /* CapturerVC */ = {
+			isa = PBXGroup;
+			children = (
+				9F9DF9D72C9FD09A00649E4F /* Views */,
+				9FF72DFF2C982B5D003B6EF6 /* CapturerViewController.swift */,
+			);
+			path = CapturerVC;
+			sourceTree = "<group>";
+		};
+		9F9DF9D72C9FD09A00649E4F /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				9F9DF9D52C9ED4F500649E4F /* RecordButton.swift */,
+				9F9DF9D82C9FD0BF00649E4F /* RluerView.swift */,
+				9F9DF9DA2C9FD0D400649E4F /* RulerScrollView.swift */,
+				9F9DF9DC2C9FFD8200649E4F /* CameraSelectButton.swift */,
+				9F9DF9DE2CA045C900649E4F /* ParametersButton.swift */,
+				9F9DF9E02CA0520B00649E4F /* CameraSelectMenuView.swift */,
+				9F9DF9E22CA0530200649E4F /* CameraSelectMenuItem.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		9FF72DBF2C98269F003B6EF6 = {
 			isa = PBXGroup;
 			children = (
@@ -108,12 +145,12 @@
 		9FF72DCA2C98269F003B6EF6 /* CapturerAndWirter */ = {
 			isa = PBXGroup;
 			children = (
+				9F9DF9D22C9ED4C000649E4F /* CapturerVC */,
 				9FF72E012C988407003B6EF6 /* VideoWriter */,
 				9FF72DFC2C982956003B6EF6 /* Capturer */,
 				9FF72DCB2C98269F003B6EF6 /* AppDelegate.swift */,
 				9FF72DCD2C98269F003B6EF6 /* SceneDelegate.swift */,
 				9FF72DCF2C98269F003B6EF6 /* ViewController.swift */,
-				9FF72DFF2C982B5D003B6EF6 /* CapturerViewController.swift */,
 				9FF72DD12C98269F003B6EF6 /* Main.storyboard */,
 				9FF72DD42C9826A0003B6EF6 /* Assets.xcassets */,
 				9FF72DD62C9826A0003B6EF6 /* LaunchScreen.storyboard */,
@@ -287,12 +324,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9F9DF9DF2CA045C900649E4F /* ParametersButton.swift in Sources */,
 				9FF72DD02C98269F003B6EF6 /* ViewController.swift in Sources */,
+				9F9DF9E32CA0530200649E4F /* CameraSelectMenuItem.swift in Sources */,
+				9F9DF9DB2C9FD0D400649E4F /* RulerScrollView.swift in Sources */,
 				9FF72DCC2C98269F003B6EF6 /* AppDelegate.swift in Sources */,
 				9FF72DCE2C98269F003B6EF6 /* SceneDelegate.swift in Sources */,
+				9F9DF9D62C9ED4F500649E4F /* RecordButton.swift in Sources */,
 				9FF72DFE2C98296D003B6EF6 /* Capturer.swift in Sources */,
 				9FF72E032C98841C003B6EF6 /* VideoWriter.swift in Sources */,
 				9FF72E002C982B5D003B6EF6 /* CapturerViewController.swift in Sources */,
+				9F9DF9DD2C9FFD8200649E4F /* CameraSelectButton.swift in Sources */,
+				9F9DF9E12CA0520B00649E4F /* CameraSelectMenuView.swift in Sources */,
+				9F9DF9D92C9FD0BF00649E4F /* RluerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

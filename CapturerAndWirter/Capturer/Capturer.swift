@@ -43,6 +43,17 @@ class Capturer: NSObject {
 
     // MARK: -
 
+    //
+
+    public class func getSupportDefinition() {
+
+        // 标清 Standard Definition: 640x480p
+        // 高清 High Definition: 1280x720p
+        // 全高清 Full High Definition: 1920x1080p
+        // 超高清 Ultra High Definition: 3840x2160(4k)，7268x4320(8k)
+
+    }
+
     public class func getSupportDevices() {
 
         let deviceTypes: [AVCaptureDevice.DeviceType] = [
