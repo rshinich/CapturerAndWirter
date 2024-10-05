@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9F6FAAF72CB03DDC00CF07E9 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9F6FAAF62CB03DDC00CF07E9 /* SnapKit */; };
 		9F9DF9D62C9ED4F500649E4F /* RecordButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F9DF9D52C9ED4F500649E4F /* RecordButton.swift */; };
 		9F9DF9D92C9FD0BF00649E4F /* RluerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F9DF9D82C9FD0BF00649E4F /* RluerView.swift */; };
 		9F9DF9DB2C9FD0D400649E4F /* RulerScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F9DF9DA2C9FD0D400649E4F /* RulerScrollView.swift */; };
@@ -78,6 +79,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9F6FAAF72CB03DDC00CF07E9 /* SnapKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -281,7 +283,7 @@
 			);
 			mainGroup = 9FF72DBF2C98269F003B6EF6;
 			packageReferences = (
-				9F9DF9E42CA054D500649E4F /* XCRemoteSwiftPackageReference "SnapKit" */,
+				9F6FAAF52CB03DDC00CF07E9 /* XCRemoteSwiftPackageReference "SnapKit" */,
 			);
 			productRefGroup = 9FF72DC92C98269F003B6EF6 /* Products */;
 			projectDirPath = "";
@@ -694,7 +696,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		9F9DF9E42CA054D500649E4F /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+		9F6FAAF52CB03DDC00CF07E9 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SnapKit/SnapKit";
 			requirement = {
@@ -703,6 +705,14 @@
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		9F6FAAF62CB03DDC00CF07E9 /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9F6FAAF52CB03DDC00CF07E9 /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 9FF72DC02C98269F003B6EF6 /* Project object */;
 }
