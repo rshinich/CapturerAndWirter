@@ -188,6 +188,17 @@ class CapturerViewController: UIViewController {
 
     @objc func parametersBtnClicked() {
 
+        let parametersMenuView = ParametersMenuView(frame: CGRect(x: 10, y: 100, width: 400, height: 300))
+        self.view.addSubview(parametersMenuView)
+
+        if let videoCaptureDevice = self.capturer.videoCaptureDevice {
+            let formats = Capturer.getSupportFormats(captureDevice: videoCaptureDevice)
+            parametersMenuView.updateInfo(formats: formats)
+        }
+
+        parametersMenuView.didSelectedFormat = { [weak self] format in
+            self?.capturer.updateActiveFormat(format: format, activeVideoMinFrameDuration: CMTime(), activeVideoMaxFrameDuration: CMTime())
+        }
     }
 
     @objc func handleDeviceOrientationChange() {

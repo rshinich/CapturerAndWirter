@@ -39,7 +39,7 @@ class Capturer: NSObject {
     private var isSessionRunning = false
 
     private var audioCaptureDevice: AVCaptureDevice?
-    private var videoCaptureDevice: AVCaptureDevice?
+    private(set) var videoCaptureDevice: AVCaptureDevice?
 
     private var videoDeviceInput: AVCaptureDeviceInput!
     private var audioDeviceInput: AVCaptureDeviceInput!
@@ -94,7 +94,7 @@ class Capturer: NSObject {
         return discoverySessions.devices
     }
 
-    public class func getSupportFormats(captureDevice: AVCaptureDevice) {
+    public class func getSupportFormats(captureDevice: AVCaptureDevice) -> [AVCaptureDevice.Format] {
 
         for format in captureDevice.formats {
 
@@ -119,6 +119,8 @@ class Capturer: NSObject {
         print("Minimum Zoom Factor: \(minZoomFactor)")
         print("Maximum Zoom Factor: \(maxZoomFactor)")
 
+        // TODO: 解耦，返回一些合集的参数
+        return captureDevice.formats
     }
 
     public class func getSupportDimensions(captureDevice: AVCaptureDevice) {
@@ -427,28 +429,30 @@ class Capturer: NSObject {
     /// 设置分辨率和帧率，直接设置activeFormat，从getSupportFormats(captureDevice: AVCaptureDevice)中获取。
     /// https://developer.apple.com/documentation/avfoundation/avcapturedevice/1389221-activeformat
     /// - Parameter format:
-    public func setActiveFormat(format: AVCaptureDevice.Format, activeVideoMinFrameDuration: CMTime, activeVideoMaxFrameDuration: CMTime) {
+    public func updateActiveFormat(format: AVCaptureDevice.Format, activeVideoMinFrameDuration: CMTime, activeVideoMaxFrameDuration: CMTime) {
 
-//        self.session.beginConfiguration()
-//
-//        do {
-//            try self.videoDevice.lockForConfiguration()
-//
-//            // Set the device's active format.
-//            self.videoDevice.activeFormat = format// a supported format.
-//
-//            // Set the device's min/max frame duration.
-//            self.videoDevice.activeVideoMinFrameDuration = activeVideoMinFrameDuration // a supported minimum duration.
-//            self.videoDevice.activeVideoMaxFrameDuration = activeVideoMaxFrameDuration// a supported maximum duration.
-//
-//            self.videoDevice.unlockForConfiguration()
-//        } catch {
-//            // Handle error.
-//        }
-//
-//
-//        // Apply the changes to the session.
-//        self.session.commitConfiguration()
+        guard let videoCaptureDevice = self.videoCaptureDevice else { return }
+
+        self.session.beginConfiguration()
+
+        do {
+            try videoCaptureDevice.lockForConfiguration()
+
+            // Set the device's active format.
+            videoCaptureDevice.activeFormat = format// a supported format.
+
+            // Set the device's min/max frame duration.
+//            videoCaptureDevice.activeVideoMinFrameDuration = activeVideoMinFrameDuration // a supported minimum duration.
+//            videoCaptureDevice.activeVideoMaxFrameDuration = activeVideoMaxFrameDuration// a supported maximum duration.
+
+            videoCaptureDevice.unlockForConfiguration()
+        } catch {
+            // Handle error.
+        }
+
+
+        // Apply the changes to the session.
+        self.session.commitConfiguration()
     }
 
     // MARK: 更新FPS
@@ -572,11 +576,19 @@ class Capturer: NSObject {
         self.session.commitConfiguration()
     }
 
+    // MARK: - Calculator
+
+    private var lastTimestamp: CMTime?
+    private var frameCount: Int = 0
+    private var frameRate: Double = 0.0
+    private var startTime: CFAbsoluteTime = CFAbsoluteTimeGetCurrent()
+
 }
 
 // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate & AVCaptureAudioDataOutputSampleBufferDelegate
 
 extension Capturer: AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAudioDataOutputSampleBufferDelegate {
+
 
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
 
@@ -584,6 +596,8 @@ extension Capturer: AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAudio
 
             self.currentVideoBuffer = sampleBuffer
             self.onVideoSampleBuffer?(sampleBuffer)
+
+            self.calaulatorResAndFps(sampleBuffer: sampleBuffer)
 
         } else if output == self.audioOutput {
 
@@ -593,9 +607,51 @@ extension Capturer: AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAudio
 
     func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
 
-//        print("zzr+++captureOutput didDrop sampleBuffer = \(sampleBuffer), output = \(output)")
+        //        print("zzr+++captureOutput didDrop sampleBuffer = \(sampleBuffer), output = \(output)")
 
     }
 
+    func calaulatorResAndFps(sampleBuffer: CMSampleBuffer) {
+
+        guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+            return
+        }
+
+        let width = CVPixelBufferGetWidth(imageBuffer)
+        let height = CVPixelBufferGetHeight(imageBuffer)
+
+        // 打印分辨率
+        print("[Calculator] 当前分辨率: \(width)x\(height)")
+
+        // 获取当前帧的时间戳
+        let currentTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+
+        // 计算瞬时帧率
+        if let lastTimestamp = lastTimestamp {
+            let elapsed = CMTimeGetSeconds(currentTimestamp - lastTimestamp)
+            if elapsed > 0 {
+                frameRate = 1.0 / elapsed
+                print(String(format: "[Calculator] 瞬时帧率: %.2f FPS", frameRate))
+            }
+        }
+
+        lastTimestamp = currentTimestamp
+
+        // 动态计算平均帧率（每秒统计一次）
+        frameCount += 1
+        let currentTime = CFAbsoluteTimeGetCurrent()
+        let elapsedTime = currentTime - startTime
+
+        if elapsedTime >= 1.0 {
+            frameRate = Double(frameCount) / elapsedTime
+            frameCount = 0
+            startTime = currentTime
+            print(String(format: "[Calculator] 动态计算帧率: %.2f FPS", frameRate))
+        }
+    }
 
 }
+
+// MARK: -
+
+
