@@ -11,7 +11,7 @@ import Foundation
 
 class CapturerViewController: UIViewController {
 
-    let capturer: Capturer = Capturer(fps: 30, preset: .hd1280x720)
+    let capturer: Capturer = Capturer()
     var writer: VideoWriter?
 
     let cameraView = UIView()

@@ -19,8 +19,9 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let devices = Capturer.getSupportDevices()
-        self.devices = devices
+        let videoDevices = Capturer.getSupportVideoDevices()
+        let audioDevices = Capturer.getSupportAudioDevices()
+        self.devices = videoDevices + audioDevices
 
 //        for device in devices {
 //

@@ -23,23 +23,29 @@ class Capturer: NSObject {
     private let videoOutputQueue = DispatchQueue(label: "com.zzr.camera.videoOutput")
     private let audioOutputQueue = DispatchQueue(label: "com.zzr.camera.audioOutput")
 
-    private let session = AVCaptureSession()
-    private var isSessionRunning = false
 
-    private var videoDevice: AVCaptureDevice!
-    private var videoDeviceInput: AVCaptureDeviceInput!
-
-    private var videoOutput = AVCaptureVideoDataOutput()
-    private var audioOutput = AVCaptureAudioDataOutput()
-
-    private var preset: AVCaptureSession.Preset
-    private var fps: Int32
+//    private var preset: AVCaptureSession.Preset
+//    private var fps: Int32
 
     public var previewLayer: AVCaptureVideoPreviewLayer?
 
     public var onPreviewLayerSetSuccess: ((_ previewLayer: AVCaptureVideoPreviewLayer) -> Void)?
     public var onVideoSampleBuffer: ((_ sampleBuffer: CMSampleBuffer) -> Void)?
     public var onAudioSampleBuffer: ((_ sampleBuffer: CMSampleBuffer) -> Void)?
+
+    // MARK: -
+
+    private let session = AVCaptureSession()
+    private var isSessionRunning = false
+
+    private var audioCaptureDevice: AVCaptureDevice?
+    private var videoCaptureDevice: AVCaptureDevice?
+
+    private var videoDeviceInput: AVCaptureDeviceInput!
+    private var audioDeviceInput: AVCaptureDeviceInput!
+
+    private var videoOutput = AVCaptureVideoDataOutput()
+    private var audioOutput = AVCaptureAudioDataOutput()
 
     // MARK: -
 
@@ -54,7 +60,18 @@ class Capturer: NSObject {
 
     }
 
-    public class func getSupportDevices() -> [AVCaptureDevice] {
+    public class func getSupportAudioDevices() -> [AVCaptureDevice] {
+
+        let deviceTypes: [AVCaptureDevice.DeviceType] = [
+            .builtInMicrophone  // 麦克风
+        ]
+
+        let discoverySessions = AVCaptureDevice.DiscoverySession(deviceTypes: deviceTypes, mediaType: .audio, position: .unspecified)
+
+        return discoverySessions.devices
+    }
+
+    public class func getSupportVideoDevices(position: AVCaptureDevice.Position = .unspecified) -> [AVCaptureDevice] {
 
         let deviceTypes: [AVCaptureDevice.DeviceType] = [
             .builtInWideAngleCamera, // 广角摄像头
@@ -65,8 +82,6 @@ class Capturer: NSObject {
             .builtInTripleCamera,    // 三摄像头
             .builtInTrueDepthCamera, // 景深摄像头(支持Face ID的摄像头) 主要用于需要捕捉FaceID的建模，或者类似Animoji之类的情况
         ]
-
-        let position: AVCaptureDevice.Position = .unspecified
 
         let discoverySessions = AVCaptureDevice.DiscoverySession(deviceTypes: deviceTypes,
                                                                  mediaType: .video,
@@ -140,32 +155,52 @@ class Capturer: NSObject {
     }
 
     // MARK: -
-
-    init(fps: Int32, preset: AVCaptureSession.Preset) {
-
-        self.fps = fps
-        self.preset = preset
+    
+    /// 初始化方法
+    /// - Parameters:
+    ///   - videoCaptureDevice: 通过外部指定捕获Video的Device，如果传空，则默认选择获取列表中的第一个；
+    ///   - audioCaptureDevice: 通过外部指定捕获Audio的Device，如果传空，则默认选择获取列表中的第一个;
+    init(videoCaptureDevice: AVCaptureDevice? = nil, audioCaptureDevice: AVCaptureDevice? = nil) {
 
         super.init()
-        self.setup()
-    }
 
-    private func setup() {
-
+        // 1. 检查权限
         self.checkCameraAccess()
         self.checkMicrophoneAccess()
 
+        // 2. 设置device信息
+        if let videoCaptureDevice = videoCaptureDevice {
+            self.videoCaptureDevice = videoCaptureDevice
+        } else {
+            // TODO: 还是使用系统的 AVCaptureDevice.systemPreferredCamera？
+            // AVCaptureDevice.self.addObserver(self, forKeyPath: "systemPreferredCamera", options: [.new], context: &systemPreferredCameraContext)
+            self.videoCaptureDevice = Capturer.getSupportVideoDevices().first
+        }
+
+        if let audioCaptureDevice = audioCaptureDevice {
+            self.audioCaptureDevice = audioCaptureDevice
+        } else {
+            self.audioCaptureDevice = Capturer.getSupportAudioDevices().first
+        }
+
+        // TODO: 判断如果device赋值失败了，则应该初始化也失败了，是不是不需要直接走后边的步骤了？
+
+        // 3. 配置session（这里先不指定session的preset,使用默认的inputPriority，以保证后续设置ActiveFormat的成功 https://developer.apple.com/documentation/avfoundation/avcapturesessionpresetinputpriority）
+
         self.sessionQueue.async {
 
-            if self.session.canSetSessionPreset(self.preset) {
-                self.session.sessionPreset = self.preset
-            }
+//            if self.session.canSetSessionPreset(self.preset) {
+//                self.session.sessionPreset = self.preset
+//            }
 
             self.configureSession()
-            self.updateVideoFPS(self.fps)
+//            self.updateVideoFPS(self.fps)
             self.setupPreviewLayer()
         }
+
     }
+
+    // MARK: - Access
 
     /// 检查相机权限
     private func checkCameraAccess() {
@@ -200,6 +235,8 @@ class Capturer: NSObject {
         }
     }
 
+    // MARK: - Session
+
     /// Call this on the session queue.
     private func configureSession() {
 
@@ -218,35 +255,29 @@ class Capturer: NSObject {
         self.session.commitConfiguration()
     }
 
+    // TODO: 使用try-catch
     private func addVideoInput() {
 
         do {
-//            var defaultVideoDevice: AVCaptureDevice? = AVCaptureDevice.systemPreferredCamera
-            guard let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
 
+            guard let videoCaptureDevice = self.videoCaptureDevice else {
                 print("Create video device failed")
                 self.setupResult = .configurationFailed
                 return
             }
 
-            let videoDeviceInput = try AVCaptureDeviceInput(device: videoDevice)
+            let videoDeviceInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
 
-//            AVCaptureDevice.self.addObserver(self, forKeyPath: "systemPreferredCamera", options: [.new], context: &systemPreferredCameraContext)
-
-            guard self.session.canAddInput(videoDeviceInput) else {
-
+            if self.session.canAddInput(videoDeviceInput) {
+                self.session.addInput(videoDeviceInput)
+                self.videoDeviceInput = videoDeviceInput
+            } else {
                 print("Couldn't add video device input to the session.")
                 self.setupResult = .configurationFailed
                 return
             }
 
-            self.session.addInput(videoDeviceInput)
-
-            self.videoDevice = videoDevice
-            self.videoDeviceInput = videoDeviceInput
-
             // TODO: createDeviceRotationCoordinator
-
 
         } catch {
             print("Couldn't create video device input: \(error)")
@@ -256,26 +287,32 @@ class Capturer: NSObject {
 
     }
 
+    // TODO: 使用try-catch
     private func addAudioInput() {
 
         do {
-            guard let audioDevice = AVCaptureDevice.default(for: .audio) else {
 
+            guard let audioCaptureDevice = self.audioCaptureDevice else {
                 print("Create audio device failed")
                 self.setupResult = .configurationFailed
                 return
             }
 
-            let audioDeviceInput = try AVCaptureDeviceInput(device: audioDevice)
+            let audioDeviceInput = try AVCaptureDeviceInput(device: audioCaptureDevice)
 
             if self.session.canAddInput(audioDeviceInput) {
                 self.session.addInput(audioDeviceInput)
+                self.audioDeviceInput = audioDeviceInput
             } else {
                 print("Could not add audio device input to the session")
+                self.setupResult = .configurationFailed
+                return
             }
 
         } catch {
             print("Could not create audio device input: \(error)")
+            self.setupResult = .configurationFailed
+            return
         }
 
     }
@@ -324,6 +361,8 @@ class Capturer: NSObject {
 
     }
 
+    // MARK: - Preview
+
     private func setupPreviewLayer() {
 
         guard self.setupResult == .success else { return }
@@ -335,9 +374,17 @@ class Capturer: NSObject {
         self.onPreviewLayerSetSuccess?(self.previewLayer!)
     }
 
+    public func updatePreviewVideoOrientation(videoOrientation: AVCaptureVideoOrientation) {
 
+//        self.previewLayer?.connection?.videoOrientation = videoOrientation
 
-    // MARK: - Public
+        if let videoConnection = self.videoOutput.connection(with: .video) {
+            videoConnection.videoOrientation = videoOrientation
+        }
+
+    }
+
+    // MARK: - Public start or stop session
 
     public func startRunning() {
 
@@ -363,16 +410,18 @@ class Capturer: NSObject {
         }
     }
 
+    // MARK: -
+
     // MARK: 更新分辨率
     public func updateSessionPreset(sessionPreset:AVCaptureSession.Preset,complate: @escaping ((_ preset: AVCaptureSession.Preset) -> Void)) {
 
-        session.beginConfiguration()
-        session.sessionPreset = sessionPreset
-        session.commitConfiguration()
-
-        preset = sessionPreset
-
-        complate(preset)
+//        session.beginConfiguration()
+//        session.sessionPreset = sessionPreset
+//        session.commitConfiguration()
+//
+//        preset = sessionPreset
+//
+//        complate(preset)
     }
 
     /// 设置分辨率和帧率，直接设置activeFormat，从getSupportFormats(captureDevice: AVCaptureDevice)中获取。
@@ -380,26 +429,26 @@ class Capturer: NSObject {
     /// - Parameter format:
     public func setActiveFormat(format: AVCaptureDevice.Format, activeVideoMinFrameDuration: CMTime, activeVideoMaxFrameDuration: CMTime) {
 
-        self.session.beginConfiguration()
-
-        do {
-            try self.videoDevice.lockForConfiguration()
-
-            // Set the device's active format.
-            self.videoDevice.activeFormat = format// a supported format.
-
-            // Set the device's min/max frame duration.
-            self.videoDevice.activeVideoMinFrameDuration = activeVideoMinFrameDuration // a supported minimum duration.
-            self.videoDevice.activeVideoMaxFrameDuration = activeVideoMaxFrameDuration// a supported maximum duration.
-
-            self.videoDevice.unlockForConfiguration()
-        } catch {
-            // Handle error.
-        }
-
-
-        // Apply the changes to the session.
-        self.session.commitConfiguration()
+//        self.session.beginConfiguration()
+//
+//        do {
+//            try self.videoDevice.lockForConfiguration()
+//
+//            // Set the device's active format.
+//            self.videoDevice.activeFormat = format// a supported format.
+//
+//            // Set the device's min/max frame duration.
+//            self.videoDevice.activeVideoMinFrameDuration = activeVideoMinFrameDuration // a supported minimum duration.
+//            self.videoDevice.activeVideoMaxFrameDuration = activeVideoMaxFrameDuration// a supported maximum duration.
+//
+//            self.videoDevice.unlockForConfiguration()
+//        } catch {
+//            // Handle error.
+//        }
+//
+//
+//        // Apply the changes to the session.
+//        self.session.commitConfiguration()
     }
 
     // MARK: 更新FPS
@@ -423,60 +472,6 @@ class Capturer: NSObject {
         }
     }
 
-    //MARK: 更新zoom
-    public func updateZoom(factor: CGFloat, rate: Float, isAnimation: Bool) {
-        do {
-            try videoDevice?.lockForConfiguration()
-            if isAnimation {
-                videoDevice?.cancelVideoZoomRamp()
-                videoDevice?.ramp(toVideoZoomFactor: factor, withRate: rate)
-            } else {
-                videoDevice?.videoZoomFactor = factor
-            }
-
-            videoDevice?.unlockForConfiguration()
-        } catch let error {
-            print(error)
-        }
-    }
-
-    /// 开关闪光灯
-    public func turnOnOffTroch(_ isOn: Bool) {
-        // TODO: complete me
-    }
-
-    // MARK: 切换摄像头
-    public func switchingCamera() {
-
-        var videoDevice: AVCaptureDevice?
-        var isFrontNow = false
-
-        if videoDevice?.position == .back {
-
-            videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera , for: .video, position: .front)
-            isFrontNow = true
-
-        } else if videoDevice?.position == .front {
-
-            videoDevice = AVCaptureDevice.default(.builtInUltraWideCamera , for: .video, position: .back)
-
-            isFrontNow = false
-        }
-
-        self.videoDevice = videoDevice
-
-    }
-
-    public func updatePreviewVideoOrientation(videoOrientation: AVCaptureVideoOrientation) {
-
-//        self.previewLayer?.connection?.videoOrientation = videoOrientation
-
-        if let videoConnection = self.videoOutput.connection(with: .video) {
-            videoConnection.videoOrientation = videoOrientation
-        }
-
-    }
-
     // MARK: - Snapshot
 
     private(set) var snapshotVideoBuffer: CMSampleBuffer?
@@ -492,8 +487,40 @@ class Capturer: NSObject {
         return self.snapshotVideoBuffer
     }
 
+    // MARK: - Device, Foucs
 
-    // MARK: - DeviceRotationCoordinator
+    // MARK: - Device, Exposure
+
+    // MARK: - Device, Flash
+
+    // MARK: - Device, Torch
+
+    // MARK: - Device, Video Stabilization
+
+    // MARK: - Device, White Balance
+
+    // MARK: - Device, Zoom
+
+    public func updateZoom(factor: CGFloat, rate: Float, isAnimation: Bool) {
+
+        guard let videoCaptureDevice = self.videoCaptureDevice else { return }
+
+        do {
+            try videoCaptureDevice.lockForConfiguration()
+            if isAnimation {
+                videoCaptureDevice.cancelVideoZoomRamp()
+                videoCaptureDevice.ramp(toVideoZoomFactor: factor, withRate: rate)
+            } else {
+                videoCaptureDevice.videoZoomFactor = factor
+            }
+
+            videoCaptureDevice.unlockForConfiguration()
+        } catch let error {
+            print(error)
+        }
+    }
+
+    // MARK: - Device Orientation
 
 //    private var videoRotationAngleForHorizonLevelPreviewObservation: NSKeyValueObservation?
 //    private var videoDeviceRotationCoordinator: AVCaptureDevice.RotationCoordinator!
@@ -508,6 +535,42 @@ class Capturer: NSObject {
 //            self.previewLayer?.connection?.videoRotationAngle = videoRotationAngleForHorizonLevelPreview
 //        }
 //    }
+
+    // MARK: - Device
+    
+    /// 切换摄像头，判断当前摄像头是前摄还是后摄，使用相反的摄像头
+    public func swicthingCamera() {
+
+        if self.videoCaptureDevice?.position == .back {
+
+            if let videoCaptureDevice = Capturer.getSupportVideoDevices(position: .front).first {
+                self.updateVideoCaptureDevice(videoCaptureDevice: videoCaptureDevice)
+            }
+
+        } else if self.videoCaptureDevice?.position == .front {
+
+            if let videoCaptureDevice = Capturer.getSupportVideoDevices(position: .back).first {
+                self.updateVideoCaptureDevice(videoCaptureDevice: videoCaptureDevice)
+            }
+
+        } else {
+
+        }
+    }
+    
+    /// 更新当前使用的摄像头信息
+    /// - Parameter videoCaptureDevice: Device实例
+    public func updateVideoCaptureDevice(videoCaptureDevice: AVCaptureDevice) {
+
+        self.session.beginConfiguration()
+
+        self.session.removeInput(self.videoDeviceInput)
+
+        self.videoCaptureDevice = videoCaptureDevice
+        self.addVideoInput()
+
+        self.session.commitConfiguration()
+    }
 
 }
 
