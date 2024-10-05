@@ -46,6 +46,8 @@ class CapturerViewController: UIViewController {
 
     private func setupCapturer() {
 
+
+
         self.capturer.startRunning()
 
         self.capturer.onPreviewLayerSetSuccess = { [weak self] previewLayer in

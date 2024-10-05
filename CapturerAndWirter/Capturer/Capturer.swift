@@ -54,7 +54,7 @@ class Capturer: NSObject {
 
     }
 
-    public class func getSupportDevices() {
+    public class func getSupportDevices() -> [AVCaptureDevice] {
 
         let deviceTypes: [AVCaptureDevice.DeviceType] = [
             .builtInWideAngleCamera, // 广角摄像头
@@ -73,8 +73,70 @@ class Capturer: NSObject {
                                                                  position: position)
 
         for device in discoverySessions.devices {
-            print("discoverySession = \(device)")
+            print("discoverySession = \(device), localizedName = \(device.localizedName)")
         }
+
+        return discoverySessions.devices
+    }
+
+    public class func getSupportFormats(captureDevice: AVCaptureDevice) {
+
+        for format in captureDevice.formats {
+
+//            print("\(format.description)")
+
+            let desc = format.formatDescription
+            let dimensions = CMVideoFormatDescriptionGetDimensions(desc)
+
+            print("device \(captureDevice) support dimensions = \(dimensions)")
+
+            for range in format.videoSupportedFrameRateRanges {
+                let minFrameRate = range.minFrameRate
+                let maxFrameRate = range.maxFrameRate
+                print("Supported frame rate range: \(minFrameRate) to \(maxFrameRate) FPS")
+
+            }
+
+        }
+
+        let minZoomFactor = captureDevice.minAvailableVideoZoomFactor
+        let maxZoomFactor = captureDevice.maxAvailableVideoZoomFactor
+        print("Minimum Zoom Factor: \(minZoomFactor)")
+        print("Maximum Zoom Factor: \(maxZoomFactor)")
+
+    }
+
+    public class func getSupportDimensions(captureDevice: AVCaptureDevice) {
+
+        for format in captureDevice.formats {
+
+            let desc = format.formatDescription
+            let dimensions = CMVideoFormatDescriptionGetDimensions(desc)
+
+            print("device \(captureDevice) support dimensions = \(dimensions)")
+        }
+    }
+
+    public class func getSupportFrameRateRanges(captureDevice: AVCaptureDevice) {
+
+        for format in captureDevice.formats {
+
+            for range in format.videoSupportedFrameRateRanges {
+                let minFrameRate = range.minFrameRate
+                let maxFrameRate = range.maxFrameRate
+                print("Supported frame rate range: \(minFrameRate) to \(maxFrameRate) FPS")
+
+            }
+        }
+    }
+
+    public class func getSupportZoomRange(captureDevice: AVCaptureDevice) {
+
+        let minZoomFactor = captureDevice.minAvailableVideoZoomFactor
+        let maxZoomFactor = captureDevice.maxAvailableVideoZoomFactor
+
+        print("Minimum Zoom Factor: \(minZoomFactor)")
+        print("Maximum Zoom Factor: \(maxZoomFactor)")
     }
 
     // MARK: -
@@ -91,6 +153,7 @@ class Capturer: NSObject {
     private func setup() {
 
         self.checkCameraAccess()
+        self.checkMicrophoneAccess()
 
         self.sessionQueue.async {
 
@@ -109,6 +172,23 @@ class Capturer: NSObject {
 
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized: break
+        case .denied: break //TODO: alert user
+        case .notDetermined: do {
+            self.sessionQueue.suspend()
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                if !granted { self.setupResult = .notAuthorized }
+                self.sessionQueue.resume()
+            }
+        }
+        default: self.setupResult = .notAuthorized
+        }
+    }
+
+    private func checkMicrophoneAccess() {
+
+        switch AVCaptureDevice.authorizationStatus(for: .audio) {
+        case .authorized: break
+        case .denied: break //TODO: alert user
         case .notDetermined: do {
             self.sessionQueue.suspend()
             AVCaptureDevice.requestAccess(for: .video) { granted in
@@ -293,6 +373,33 @@ class Capturer: NSObject {
         preset = sessionPreset
 
         complate(preset)
+    }
+
+    /// 设置分辨率和帧率，直接设置activeFormat，从getSupportFormats(captureDevice: AVCaptureDevice)中获取。
+    /// https://developer.apple.com/documentation/avfoundation/avcapturedevice/1389221-activeformat
+    /// - Parameter format:
+    public func setActiveFormat(format: AVCaptureDevice.Format, activeVideoMinFrameDuration: CMTime, activeVideoMaxFrameDuration: CMTime) {
+
+        self.session.beginConfiguration()
+
+        do {
+            try self.videoDevice.lockForConfiguration()
+
+            // Set the device's active format.
+            self.videoDevice.activeFormat = format// a supported format.
+
+            // Set the device's min/max frame duration.
+            self.videoDevice.activeVideoMinFrameDuration = activeVideoMinFrameDuration // a supported minimum duration.
+            self.videoDevice.activeVideoMaxFrameDuration = activeVideoMaxFrameDuration// a supported maximum duration.
+
+            self.videoDevice.unlockForConfiguration()
+        } catch {
+            // Handle error.
+        }
+
+
+        // Apply the changes to the session.
+        self.session.commitConfiguration()
     }
 
     // MARK: 更新FPS
