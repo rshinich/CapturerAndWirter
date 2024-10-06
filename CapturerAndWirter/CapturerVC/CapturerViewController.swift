@@ -11,7 +11,7 @@ import Foundation
 
 class CapturerViewController: UIViewController {
 
-    let capturer: Capturer = Capturer()
+    var capturer: Capturer?
     var writer: VideoWriter?
 
     let cameraView = UIView()
@@ -46,11 +46,23 @@ class CapturerViewController: UIViewController {
 
     private func setupCapturer() {
 
+        Capturer.create { result in
+            switch result {
+            case .success(let capturer):
+                self.startCapturerRunning(capturer: capturer)
+            case .failure(let error):
+                print("Failed to create Capturer: \(error)")
+            }
+        }
+    }
 
+    private func startCapturerRunning(capturer: Capturer) {
 
-        self.capturer.startRunning()
+        self.capturer = capturer
 
-        self.capturer.onPreviewLayerSetSuccess = { [weak self] previewLayer in
+        self.capturer?.startRunning()
+
+        self.capturer?.onPreviewLayerSetSuccess = { [weak self] previewLayer in
 
             guard let self = self else { return }
 
@@ -64,7 +76,7 @@ class CapturerViewController: UIViewController {
             }
         }
 
-        self.capturer.onVideoSampleBuffer = { [weak self] videoSampleBuffer in
+        self.capturer?.onVideoSampleBuffer = { [weak self] videoSampleBuffer in
 
             if self?.writer?.isRecording ?? false {
                 self?.writer?.appendVideoSampleBuffer(videoSampleBuffer)
@@ -72,12 +84,13 @@ class CapturerViewController: UIViewController {
 
         }
 
-        self.capturer.onAudioSampleBuffer = { [weak self] audioSampleBuffer in
+        self.capturer?.onAudioSampleBuffer = { [weak self] audioSampleBuffer in
 
             if self?.writer?.isRecording ?? false {
                 self?.writer?.appendAudioSampleBuffer(audioSampleBuffer)
             }
         }
+
     }
 
     private func setupView() {
@@ -132,7 +145,7 @@ class CapturerViewController: UIViewController {
         let fileName = UUID().uuidString + ".mov"
         let fullURL = documentsDirectory.appendingPathComponent(fileName)
 
-        guard let currentVideoBuffer = self.capturer.currentVideoBuffer else { return }
+        guard let currentVideoBuffer = self.capturer?.currentVideoBuffer else { return }
 
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(currentVideoBuffer) else { return }
 
@@ -144,7 +157,7 @@ class CapturerViewController: UIViewController {
             }
         })
 
-        guard let currentVideoBuffer = self.capturer.currentVideoBuffer else { return }
+        guard let currentVideoBuffer = self.capturer?.currentVideoBuffer else { return }
 
         let startSessionSourceTime = CMSampleBufferGetPresentationTimeStamp(currentVideoBuffer)
 
@@ -191,13 +204,13 @@ class CapturerViewController: UIViewController {
         let parametersMenuView = ParametersMenuView(frame: CGRect(x: 10, y: 100, width: 400, height: 300))
         self.view.addSubview(parametersMenuView)
 
-        if let videoCaptureDevice = self.capturer.videoCaptureDevice {
+        if let videoCaptureDevice = self.capturer?.videoCaptureDevice {
             let formats = Capturer.getSupportFormats(captureDevice: videoCaptureDevice)
             parametersMenuView.updateInfo(formats: formats)
         }
 
         parametersMenuView.didSelectedFormat = { [weak self] format in
-            self?.capturer.updateActiveFormat(format: format, activeVideoMinFrameDuration: CMTime(), activeVideoMaxFrameDuration: CMTime())
+            self?.capturer?.updateActiveFormat(format: format, activeVideoMinFrameDuration: CMTime(), activeVideoMaxFrameDuration: CMTime())
         }
     }
 
@@ -211,15 +224,15 @@ class CapturerViewController: UIViewController {
         switch orientation {
         case .portrait:
             print("设备现在是竖屏模式")
-            self.capturer.updatePreviewVideoOrientation(videoOrientation: .portrait)
+            self.capturer?.updatePreviewVideoOrientation(videoOrientation: .portrait)
             angle = 0
         case .landscapeLeft:
             print("设备现在是左横屏模式")
-            self.capturer.updatePreviewVideoOrientation(videoOrientation: .landscapeRight)
+            self.capturer?.updatePreviewVideoOrientation(videoOrientation: .landscapeRight)
             angle = .pi/2
         case .landscapeRight:
             print("设备现在是右横屏模式")
-            self.capturer.updatePreviewVideoOrientation(videoOrientation: .landscapeLeft)
+            self.capturer?.updatePreviewVideoOrientation(videoOrientation: .landscapeLeft)
             angle = -.pi/2
         case .portraitUpsideDown:
             print("设备现在是倒立竖屏模式")

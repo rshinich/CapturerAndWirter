@@ -11,13 +11,16 @@ import UIKit
 
 class Capturer: NSObject {
 
-    private enum SessionSetupResult {
-        case success
-        case notAuthorized
-        case configurationFailed
+    enum CapturerError: Error {
+        case videoDeviceAccessDenied
+        case audioDeviceAccessDenied
+        case videoCaptureDeviceNotExist
+        case audioCaptureDeviceNotExist
+        case addVideoInputFailed
+        case addAudioInputFailed
+        case addVideoOutputFailed
+        case addAudioOutputFailed
     }
-
-    private var setupResult: SessionSetupResult = .success
 
     private let sessionQueue = DispatchQueue(label: "com.zzr.camera.capture")
     private let videoOutputQueue = DispatchQueue(label: "com.zzr.camera.videoOutput")
@@ -48,8 +51,6 @@ class Capturer: NSObject {
     private var audioOutput = AVCaptureAudioDataOutput()
 
     // MARK: -
-
-    //
 
     public class func getSupportDefinition() {
 
@@ -158,19 +159,48 @@ class Capturer: NSObject {
 
     // MARK: -
     
+    private override init() {
+        super.init()
+    }
+
     /// 初始化方法
     /// - Parameters:
     ///   - videoCaptureDevice: 通过外部指定捕获Video的Device，如果传空，则默认选择获取列表中的第一个；
     ///   - audioCaptureDevice: 通过外部指定捕获Audio的Device，如果传空，则默认选择获取列表中的第一个;
-    init(videoCaptureDevice: AVCaptureDevice? = nil, audioCaptureDevice: AVCaptureDevice? = nil) {
+    ///   - completion:
+    static func create(videoCaptureDevice: AVCaptureDevice? = nil, audioCaptureDevice: AVCaptureDevice? = nil, completion: @escaping (Result<Capturer, Error>) -> Void) {
 
-        super.init()
+        let instance = Capturer()
 
-        // 1. 检查权限
-        self.checkCameraAccess()
-        self.checkMicrophoneAccess()
+        instance.checkCameraAccess { cameraResult in
+            switch cameraResult {
+            case .success:
+                instance.checkMicrophoneAccess { micResult in
+                    switch micResult {
+                    case .success:
+                        instance.setupDevices(videoCaptureDevice: videoCaptureDevice, audioCaptureDevice: audioCaptureDevice)
+                        instance.sessionQueue.async {
+                            do {
+                                try instance.configureSession()
+                                completion(.success(instance))
+                                instance.setupPreviewLayer()
 
-        // 2. 设置device信息
+                            } catch {
+                                completion(.failure(error))
+                            }
+                        }
+                    case .failure(let micError):
+                        completion(.failure(micError))
+                    }
+                }
+            case .failure(let cameraError):
+                completion(.failure(cameraError))
+            }
+        }
+    }
+
+    private func setupDevices(videoCaptureDevice: AVCaptureDevice?, audioCaptureDevice: AVCaptureDevice?) {
+
         if let videoCaptureDevice = videoCaptureDevice {
             self.videoCaptureDevice = videoCaptureDevice
         } else {
@@ -184,150 +214,117 @@ class Capturer: NSObject {
         } else {
             self.audioCaptureDevice = Capturer.getSupportAudioDevices().first
         }
-
-        // TODO: 判断如果device赋值失败了，则应该初始化也失败了，是不是不需要直接走后边的步骤了？
-
-        // 3. 配置session（这里先不指定session的preset,使用默认的inputPriority，以保证后续设置ActiveFormat的成功 https://developer.apple.com/documentation/avfoundation/avcapturesessionpresetinputpriority）
-
-        self.sessionQueue.async {
-
-//            if self.session.canSetSessionPreset(self.preset) {
-//                self.session.sessionPreset = self.preset
-//            }
-
-            self.configureSession()
-//            self.updateVideoFPS(self.fps)
-            self.setupPreviewLayer()
-        }
-
     }
 
     // MARK: - Access
 
     /// 检查相机权限
-    private func checkCameraAccess() {
+    private func checkCameraAccess(completion: @escaping (Result<Void, Error>) -> Void) {
 
         switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized: break
-        case .denied: break //TODO: alert user
+        case .authorized:   completion(.success(()))
+        case .denied:       completion(.failure(CapturerError.videoDeviceAccessDenied))
         case .notDetermined: do {
             self.sessionQueue.suspend()
             AVCaptureDevice.requestAccess(for: .video) { granted in
-                if !granted { self.setupResult = .notAuthorized }
+
                 self.sessionQueue.resume()
+
+                if granted {
+                    completion(.success(()))
+                } else {
+                    completion(.failure(CapturerError.videoDeviceAccessDenied))
+                }
             }
         }
-        default: self.setupResult = .notAuthorized
+        default:    completion(.failure(CapturerError.videoDeviceAccessDenied))
         }
     }
 
-    private func checkMicrophoneAccess() {
+    private func checkMicrophoneAccess(completion: @escaping (Result<Void, Error>) -> Void) {
 
         switch AVCaptureDevice.authorizationStatus(for: .audio) {
-        case .authorized: break
-        case .denied: break //TODO: alert user
+        case .authorized:   completion(.success(()))
+        case .denied:       completion(.failure(CapturerError.audioDeviceAccessDenied))
         case .notDetermined: do {
             self.sessionQueue.suspend()
             AVCaptureDevice.requestAccess(for: .video) { granted in
-                if !granted { self.setupResult = .notAuthorized }
+
                 self.sessionQueue.resume()
+
+                if granted {
+                    completion(.success(()))
+                } else {
+                    completion(.failure(CapturerError.audioDeviceAccessDenied))
+                }
             }
         }
-        default: self.setupResult = .notAuthorized
+        default:    completion(.failure(CapturerError.audioDeviceAccessDenied))
         }
     }
 
     // MARK: - Session
 
     /// Call this on the session queue.
-    private func configureSession() {
-
-        guard self.setupResult == .success else {
-            // TODO: log auth failed
-            return
-        }
+    private func configureSession() throws {
+        // 配置session（这里先不指定session的preset,使用默认的inputPriority，以保证后续设置ActiveFormat的成功 https://developer.apple.com/documentation/avfoundation/avcapturesessionpresetinputpriority）
 
         self.session.beginConfiguration()
 
-        self.addVideoInput()
-        self.addAudioInput()
-        self.addVideoOutput()
-        self.addAudioOutput()
+        try self.addVideoInput()
+        try self.addAudioInput()
+        try self.addVideoOutput()
+        try self.addAudioOutput()
 
         self.session.commitConfiguration()
     }
 
-    // TODO: 使用try-catch
-    private func addVideoInput() {
+    private func addVideoInput() throws {
 
-        do {
-
-            guard let videoCaptureDevice = self.videoCaptureDevice else {
-                print("Create video device failed")
-                self.setupResult = .configurationFailed
-                return
-            }
-
-            let videoDeviceInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
-
-            if self.session.canAddInput(videoDeviceInput) {
-                self.session.addInput(videoDeviceInput)
-                self.videoDeviceInput = videoDeviceInput
-            } else {
-                print("Couldn't add video device input to the session.")
-                self.setupResult = .configurationFailed
-                return
-            }
-
-            // TODO: createDeviceRotationCoordinator
-
-        } catch {
-            print("Couldn't create video device input: \(error)")
-            self.setupResult = .configurationFailed
-            return
+        guard let videoCaptureDevice = self.videoCaptureDevice else {
+            print("Create video device failed")
+            throw CapturerError.videoCaptureDeviceNotExist
         }
 
-    }
+        let videoDeviceInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
 
-    // TODO: 使用try-catch
-    private func addAudioInput() {
-
-        do {
-
-            guard let audioCaptureDevice = self.audioCaptureDevice else {
-                print("Create audio device failed")
-                self.setupResult = .configurationFailed
-                return
-            }
-
-            let audioDeviceInput = try AVCaptureDeviceInput(device: audioCaptureDevice)
-
-            if self.session.canAddInput(audioDeviceInput) {
-                self.session.addInput(audioDeviceInput)
-                self.audioDeviceInput = audioDeviceInput
-            } else {
-                print("Could not add audio device input to the session")
-                self.setupResult = .configurationFailed
-                return
-            }
-
-        } catch {
-            print("Could not create audio device input: \(error)")
-            self.setupResult = .configurationFailed
-            return
+        if self.session.canAddInput(videoDeviceInput) {
+            self.session.addInput(videoDeviceInput)
+            self.videoDeviceInput = videoDeviceInput
+        } else {
+            print("Couldn't add video device input to the session.")
+            throw CapturerError.addVideoInputFailed
         }
 
+        // TODO: createDeviceRotationCoordinator
     }
 
-    private func addVideoOutput() {
+    private func addAudioInput() throws {
+
+        guard let audioCaptureDevice = self.audioCaptureDevice else {
+            print("Create audio device failed")
+            throw CapturerError.audioCaptureDeviceNotExist
+        }
+
+        let audioDeviceInput = try AVCaptureDeviceInput(device: audioCaptureDevice)
+
+        if self.session.canAddInput(audioDeviceInput) {
+            self.session.addInput(audioDeviceInput)
+            self.audioDeviceInput = audioDeviceInput
+        } else {
+            print("Could not add audio device input to the session")
+            throw CapturerError.addAudioInputFailed
+        }
+    }
+
+    private func addVideoOutput() throws {
 
         self.videoOutput.alwaysDiscardsLateVideoFrames = false
         self.videoOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32BGRA)]
 
         guard self.session.canAddOutput(self.videoOutput) else {
             print("Could not add video data output to the session")
-            self.setupResult = .configurationFailed
-            return
+            throw CapturerError.addVideoOutputFailed
         }
 
         self.session.addOutput(self.videoOutput)
@@ -347,27 +344,22 @@ class Capturer: NSObject {
                 videoConnection.videoOrientation = .portraitUpsideDown
             }
         }
-
     }
 
-    private func addAudioOutput() {
+    private func addAudioOutput() throws {
 
         guard self.session.canAddOutput(self.audioOutput) else {
             print("Could not add audio data output to the session")
-            self.setupResult = .configurationFailed
-            return
+            throw CapturerError.addAudioOutputFailed
         }
 
         self.session.addOutput(self.audioOutput)
         self.audioOutput.setSampleBufferDelegate(self, queue: self.audioOutputQueue)
-
     }
 
     // MARK: - Preview
 
     private func setupPreviewLayer() {
-
-        guard self.setupResult == .success else { return }
 
         self.previewLayer = AVCaptureVideoPreviewLayer(session: self.session)
         self.previewLayer?.videoGravity = .resizeAspectFill
@@ -391,24 +383,16 @@ class Capturer: NSObject {
     public func startRunning() {
 
         self.sessionQueue.async {
-
-            switch self.setupResult {
-            case .success:
-                self.session.startRunning()
-                self.isSessionRunning = self.session.isRunning
-            case .notAuthorized: break
-            case .configurationFailed: break
-            }
+            self.session.startRunning()
+            self.isSessionRunning = self.session.isRunning
         }
     }
 
     public func stopRunning() {
 
         self.sessionQueue.async {
-            if self.setupResult == .success {
-                self.session.stopRunning()
-                self.isSessionRunning = self.session.isRunning
-            }
+            self.session.stopRunning()
+            self.isSessionRunning = self.session.isRunning
         }
     }
 
@@ -457,11 +441,6 @@ class Capturer: NSObject {
 
     // MARK: 更新FPS
     public func updateVideoFPS(_ fps: Int32) {
-
-        guard self.setupResult == .success else {
-            // TODO: log auth failed
-            return
-        }
 
         print("UpdateVideoFPS fps = \(fps)")
 
@@ -571,7 +550,7 @@ class Capturer: NSObject {
         self.session.removeInput(self.videoDeviceInput)
 
         self.videoCaptureDevice = videoCaptureDevice
-        self.addVideoInput()
+        try? self.addVideoInput()
 
         self.session.commitConfiguration()
     }
@@ -649,9 +628,4 @@ extension Capturer: AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAudio
             print(String(format: "[Calculator] 动态计算帧率: %.2f FPS", frameRate))
         }
     }
-
 }
-
-// MARK: -
-
-
