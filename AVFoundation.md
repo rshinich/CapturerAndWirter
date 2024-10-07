@@ -41,3 +41,7 @@ AVCaptureDevice用来作为和硬件设备链接的管理类。
 ## Refrence
 
 https://developer.apple.com/library/archive/documentation/AudioVideo/Conceptual/AVFoundationPG/Articles/00_Introduction.html#//apple_ref/doc/uid/TP40010188-CH1-SW3
+
+https://developer.apple.com/documentation/avfoundation/capture_setup/avcam_building_a_camera_app
+
+https://juejin.cn/post/6844904121619726343

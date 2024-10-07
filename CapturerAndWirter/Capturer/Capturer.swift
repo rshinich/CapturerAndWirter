@@ -11,31 +11,6 @@ import UIKit
 
 class Capturer: NSObject {
 
-    enum CapturerError: Error {
-        case videoDeviceAccessDenied
-        case audioDeviceAccessDenied
-        case videoCaptureDeviceNotExist
-        case audioCaptureDeviceNotExist
-        case addVideoInputFailed
-        case addAudioInputFailed
-        case addVideoOutputFailed
-        case addAudioOutputFailed
-    }
-
-    private let sessionQueue = DispatchQueue(label: "com.zzr.camera.capture")
-    private let videoOutputQueue = DispatchQueue(label: "com.zzr.camera.videoOutput")
-    private let audioOutputQueue = DispatchQueue(label: "com.zzr.camera.audioOutput")
-
-
-//    private var preset: AVCaptureSession.Preset
-//    private var fps: Int32
-
-    public var previewLayer: AVCaptureVideoPreviewLayer?
-
-    public var onPreviewLayerSetSuccess: ((_ previewLayer: AVCaptureVideoPreviewLayer) -> Void)?
-    public var onVideoSampleBuffer: ((_ sampleBuffer: CMSampleBuffer) -> Void)?
-    public var onAudioSampleBuffer: ((_ sampleBuffer: CMSampleBuffer) -> Void)?
-
     // MARK: -
 
     private let session = AVCaptureSession()
@@ -50,115 +25,18 @@ class Capturer: NSObject {
     private var videoOutput = AVCaptureVideoDataOutput()
     private var audioOutput = AVCaptureAudioDataOutput()
 
-    // MARK: -
+    private let sessionQueue = DispatchQueue(label: "com.zzr.camera.capture")
+    private let videoOutputQueue = DispatchQueue(label: "com.zzr.camera.videoOutput")
+    private let audioOutputQueue = DispatchQueue(label: "com.zzr.camera.audioOutput")
 
-    public class func getSupportDefinition() {
+    public var previewLayer: AVCaptureVideoPreviewLayer?
 
-        // 标清 Standard Definition: 640x480p
-        // 高清 High Definition: 1280x720p
-        // 全高清 Full High Definition: 1920x1080p
-        // 超高清 Ultra High Definition: 3840x2160(4k)，7268x4320(8k)
-
-    }
-
-    public class func getSupportAudioDevices() -> [AVCaptureDevice] {
-
-        let deviceTypes: [AVCaptureDevice.DeviceType] = [
-            .builtInMicrophone  // 麦克风
-        ]
-
-        let discoverySessions = AVCaptureDevice.DiscoverySession(deviceTypes: deviceTypes, mediaType: .audio, position: .unspecified)
-
-        return discoverySessions.devices
-    }
-
-    public class func getSupportVideoDevices(position: AVCaptureDevice.Position = .unspecified) -> [AVCaptureDevice] {
-
-        let deviceTypes: [AVCaptureDevice.DeviceType] = [
-            .builtInWideAngleCamera, // 广角摄像头
-            .builtInTelephotoCamera, // 长焦摄像头
-            .builtInUltraWideCamera, // 超广角摄像头
-            .builtInDualCamera,      // 双摄像头
-            .builtInDualWideCamera,  // 双广角摄像头
-            .builtInTripleCamera,    // 三摄像头
-            .builtInTrueDepthCamera, // 景深摄像头(支持Face ID的摄像头) 主要用于需要捕捉FaceID的建模，或者类似Animoji之类的情况
-        ]
-
-        let discoverySessions = AVCaptureDevice.DiscoverySession(deviceTypes: deviceTypes,
-                                                                 mediaType: .video,
-                                                                 position: position)
-
-        for device in discoverySessions.devices {
-            print("discoverySession = \(device), localizedName = \(device.localizedName)")
-        }
-
-        return discoverySessions.devices
-    }
-
-    public class func getSupportFormats(captureDevice: AVCaptureDevice) -> [AVCaptureDevice.Format] {
-
-        for format in captureDevice.formats {
-
-//            print("\(format.description)")
-
-            let desc = format.formatDescription
-            let dimensions = CMVideoFormatDescriptionGetDimensions(desc)
-
-            print("device \(captureDevice) support dimensions = \(dimensions)")
-
-            for range in format.videoSupportedFrameRateRanges {
-                let minFrameRate = range.minFrameRate
-                let maxFrameRate = range.maxFrameRate
-                print("Supported frame rate range: \(minFrameRate) to \(maxFrameRate) FPS")
-
-            }
-
-        }
-
-        let minZoomFactor = captureDevice.minAvailableVideoZoomFactor
-        let maxZoomFactor = captureDevice.maxAvailableVideoZoomFactor
-        print("Minimum Zoom Factor: \(minZoomFactor)")
-        print("Maximum Zoom Factor: \(maxZoomFactor)")
-
-        // TODO: 解耦，返回一些合集的参数
-        return captureDevice.formats
-    }
-
-    public class func getSupportDimensions(captureDevice: AVCaptureDevice) {
-
-        for format in captureDevice.formats {
-
-            let desc = format.formatDescription
-            let dimensions = CMVideoFormatDescriptionGetDimensions(desc)
-
-            print("device \(captureDevice) support dimensions = \(dimensions)")
-        }
-    }
-
-    public class func getSupportFrameRateRanges(captureDevice: AVCaptureDevice) {
-
-        for format in captureDevice.formats {
-
-            for range in format.videoSupportedFrameRateRanges {
-                let minFrameRate = range.minFrameRate
-                let maxFrameRate = range.maxFrameRate
-                print("Supported frame rate range: \(minFrameRate) to \(maxFrameRate) FPS")
-
-            }
-        }
-    }
-
-    public class func getSupportZoomRange(captureDevice: AVCaptureDevice) {
-
-        let minZoomFactor = captureDevice.minAvailableVideoZoomFactor
-        let maxZoomFactor = captureDevice.maxAvailableVideoZoomFactor
-
-        print("Minimum Zoom Factor: \(minZoomFactor)")
-        print("Maximum Zoom Factor: \(maxZoomFactor)")
-    }
+    public var onPreviewLayerSetSuccess: ((_ previewLayer: AVCaptureVideoPreviewLayer) -> Void)?
+    public var onVideoSampleBuffer: ((_ sampleBuffer: CMSampleBuffer) -> Void)?
+    public var onAudioSampleBuffer: ((_ sampleBuffer: CMSampleBuffer) -> Void)?
 
     // MARK: -
-    
+
     private override init() {
         super.init()
     }
@@ -206,13 +84,13 @@ class Capturer: NSObject {
         } else {
             // TODO: 还是使用系统的 AVCaptureDevice.systemPreferredCamera？
             // AVCaptureDevice.self.addObserver(self, forKeyPath: "systemPreferredCamera", options: [.new], context: &systemPreferredCameraContext)
-            self.videoCaptureDevice = Capturer.getSupportVideoDevices().first
+            self.videoCaptureDevice = CapturerHelpers.getSupportVideoDevices().first?.raw
         }
 
         if let audioCaptureDevice = audioCaptureDevice {
             self.audioCaptureDevice = audioCaptureDevice
         } else {
-            self.audioCaptureDevice = Capturer.getSupportAudioDevices().first
+            self.audioCaptureDevice = CapturerHelpers.getSupportAudioDevices().first?.raw
         }
     }
 
@@ -413,7 +291,7 @@ class Capturer: NSObject {
     /// 设置分辨率和帧率，直接设置activeFormat，从getSupportFormats(captureDevice: AVCaptureDevice)中获取。
     /// https://developer.apple.com/documentation/avfoundation/avcapturedevice/1389221-activeformat
     /// - Parameter format:
-    public func updateActiveFormat(format: AVCaptureDevice.Format, activeVideoMinFrameDuration: CMTime, activeVideoMaxFrameDuration: CMTime) {
+    public func updateActiveFormat(format: CaptureDeviceFormatInfo) {
 
         guard let videoCaptureDevice = self.videoCaptureDevice else { return }
 
@@ -423,11 +301,11 @@ class Capturer: NSObject {
             try videoCaptureDevice.lockForConfiguration()
 
             // Set the device's active format.
-            videoCaptureDevice.activeFormat = format// a supported format.
+            videoCaptureDevice.activeFormat = format.raw// a supported format.
 
             // Set the device's min/max frame duration.
-//            videoCaptureDevice.activeVideoMinFrameDuration = activeVideoMinFrameDuration // a supported minimum duration.
-//            videoCaptureDevice.activeVideoMaxFrameDuration = activeVideoMaxFrameDuration// a supported maximum duration.
+            videoCaptureDevice.activeVideoMinFrameDuration = CMTime(value: 1, timescale: Int32(format.maxFrameRate)) // a supported minimum duration.
+            videoCaptureDevice.activeVideoMaxFrameDuration = CMTime(value: 1, timescale: Int32(format.maxFrameRate))// a supported maximum duration.
 
             videoCaptureDevice.unlockForConfiguration()
         } catch {
@@ -526,13 +404,13 @@ class Capturer: NSObject {
 
         if self.videoCaptureDevice?.position == .back {
 
-            if let videoCaptureDevice = Capturer.getSupportVideoDevices(position: .front).first {
+            if let videoCaptureDevice = CapturerHelpers.getSupportVideoDevices(position: .front).first?.raw {
                 self.updateVideoCaptureDevice(videoCaptureDevice: videoCaptureDevice)
             }
 
         } else if self.videoCaptureDevice?.position == .front {
 
-            if let videoCaptureDevice = Capturer.getSupportVideoDevices(position: .back).first {
+            if let videoCaptureDevice = CapturerHelpers.getSupportVideoDevices(position: .back).first?.raw {
                 self.updateVideoCaptureDevice(videoCaptureDevice: videoCaptureDevice)
             }
 

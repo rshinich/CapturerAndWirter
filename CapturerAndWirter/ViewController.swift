@@ -7,20 +7,19 @@
 
 import UIKit
 import SnapKit
-import AVFoundation
 
 class ViewController: UIViewController {
 
     let cameraBtn = UIButton()
     let tableview = UITableView(frame: .zero, style: .plain)
 
-    var devices: [AVCaptureDevice] = []
+    var devices: [CaptureDeviceInfo] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let videoDevices = Capturer.getSupportVideoDevices()
-        let audioDevices = Capturer.getSupportAudioDevices()
+        let videoDevices = CapturerHelpers.getSupportVideoDevices()
+        let audioDevices = CapturerHelpers.getSupportAudioDevices()
         self.devices = videoDevices + audioDevices
 
 //        for device in devices {
@@ -71,7 +70,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
 
         let device = self.devices[indexPath.row]
 
-        cell.textLabel?.text = device.localizedName
+        cell.textLabel?.text = device.name
 
         return cell
 
@@ -84,9 +83,9 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
 
         let device = self.devices[indexPath.row]
 
-        print("device is \(device.localizedName)")
+        print("device is \(device.name)")
 
-        Capturer.getSupportFormats(captureDevice: device)
+        CapturerHelpers.getSupportFormats(captureDevice: device.raw)
     }
 
 }

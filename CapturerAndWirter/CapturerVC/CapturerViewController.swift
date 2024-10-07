@@ -6,8 +6,8 @@
 //
 
 import UIKit
-import AVFoundation
 import Foundation
+import AVFoundation
 
 class CapturerViewController: UIViewController {
 
@@ -205,12 +205,13 @@ class CapturerViewController: UIViewController {
         self.view.addSubview(parametersMenuView)
 
         if let videoCaptureDevice = self.capturer?.videoCaptureDevice {
-            let formats = Capturer.getSupportFormats(captureDevice: videoCaptureDevice)
-            parametersMenuView.updateInfo(formats: formats)
+            let formats = CapturerHelpers.getSupportFormats(captureDevice: videoCaptureDevice)
+            let groupedFormats = CapturerHelpers.groupFormats(formats)
+            parametersMenuView.updateInfo(formats: groupedFormats)
         }
 
         parametersMenuView.didSelectedFormat = { [weak self] format in
-            self?.capturer?.updateActiveFormat(format: format, activeVideoMinFrameDuration: CMTime(), activeVideoMaxFrameDuration: CMTime())
+            self?.capturer?.updateActiveFormat(format: format.formats.first!)
         }
     }
 

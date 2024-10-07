@@ -17,6 +17,8 @@
 		9F9DF9DF2CA045C900649E4F /* ParametersButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F9DF9DE2CA045C900649E4F /* ParametersButton.swift */; };
 		9F9DF9E12CA0520B00649E4F /* CameraSelectMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F9DF9E02CA0520B00649E4F /* CameraSelectMenuView.swift */; };
 		9F9DF9E32CA0530200649E4F /* CameraSelectMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F9DF9E22CA0530200649E4F /* CameraSelectMenuItem.swift */; };
+		9FA5C3602CB3A8EA0042BB62 /* CapturerTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA5C35F2CB3A8EA0042BB62 /* CapturerTypes.swift */; };
+		9FA5C3642CB3B7E80042BB62 /* CapturerHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA5C3632CB3B7E80042BB62 /* CapturerHelpers.swift */; };
 		9FF72DCC2C98269F003B6EF6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72DCB2C98269F003B6EF6 /* AppDelegate.swift */; };
 		9FF72DCE2C98269F003B6EF6 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72DCD2C98269F003B6EF6 /* SceneDelegate.swift */; };
 		9FF72DD02C98269F003B6EF6 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72DCF2C98269F003B6EF6 /* ViewController.swift */; };
@@ -59,6 +61,8 @@
 		9F9DF9DE2CA045C900649E4F /* ParametersButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParametersButton.swift; sourceTree = "<group>"; };
 		9F9DF9E02CA0520B00649E4F /* CameraSelectMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CameraSelectMenuView.swift; path = CapturerAndWirter/CapturerVC/CameraSelectMenuView.swift; sourceTree = SOURCE_ROOT; };
 		9F9DF9E22CA0530200649E4F /* CameraSelectMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraSelectMenuItem.swift; sourceTree = "<group>"; };
+		9FA5C35F2CB3A8EA0042BB62 /* CapturerTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturerTypes.swift; sourceTree = "<group>"; };
+		9FA5C3632CB3B7E80042BB62 /* CapturerHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturerHelpers.swift; sourceTree = "<group>"; };
 		9FF72DC82C98269F003B6EF6 /* CapturerAndWirter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CapturerAndWirter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9FF72DCB2C98269F003B6EF6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9FF72DCD2C98269F003B6EF6 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -188,6 +192,8 @@
 			isa = PBXGroup;
 			children = (
 				9FF72DFD2C98296D003B6EF6 /* Capturer.swift */,
+				9FA5C35F2CB3A8EA0042BB62 /* CapturerTypes.swift */,
+				9FA5C3632CB3B7E80042BB62 /* CapturerHelpers.swift */,
 			);
 			path = Capturer;
 			sourceTree = "<group>";
@@ -339,11 +345,13 @@
 				9F9DF9DF2CA045C900649E4F /* ParametersButton.swift in Sources */,
 				9FF72DD02C98269F003B6EF6 /* ViewController.swift in Sources */,
 				9F9DF9E32CA0530200649E4F /* CameraSelectMenuItem.swift in Sources */,
+				9FA5C3602CB3A8EA0042BB62 /* CapturerTypes.swift in Sources */,
 				9F9DF9DB2C9FD0D400649E4F /* RulerScrollView.swift in Sources */,
 				9FF72DCC2C98269F003B6EF6 /* AppDelegate.swift in Sources */,
 				9FF72DCE2C98269F003B6EF6 /* SceneDelegate.swift in Sources */,
 				9F9DF9D62C9ED4F500649E4F /* RecordButton.swift in Sources */,
 				9FF72DFE2C98296D003B6EF6 /* Capturer.swift in Sources */,
+				9FA5C3642CB3B7E80042BB62 /* CapturerHelpers.swift in Sources */,
 				9FF72E032C98841C003B6EF6 /* VideoWriter.swift in Sources */,
 				9F6FAAFB2CB1335E00CF07E9 /* ParametersMenuView.swift in Sources */,
 				9FF72E002C982B5D003B6EF6 /* CapturerViewController.swift in Sources */,
