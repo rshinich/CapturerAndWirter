@@ -142,20 +142,23 @@ class CapturerViewController: UIViewController {
         }
 
         // 创建一个唯一的文件名
-        let fileName = UUID().uuidString + ".mov"
+        let fileName = UUID().uuidString + ".mp4"
         let fullURL = documentsDirectory.appendingPathComponent(fileName)
 
         guard let currentVideoBuffer = self.capturer?.currentVideoBuffer else { return }
 
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(currentVideoBuffer) else { return }
 
-        self.writer = VideoWriter(outputURL: fullURL, videoSize: CGSize(width: CVPixelBufferGetWidth(pixelBuffer), height: CVPixelBufferGetHeight(pixelBuffer)), completion: { error in
-            if error == nil {
-                print("start recording in \(fullURL)")
-            } else {
+        VideoWriter.create(outputURL: fullURL,
+                           videoSize: CGSize(width: CVPixelBufferGetWidth(pixelBuffer), height: CVPixelBufferGetHeight(pixelBuffer))) { [weak self] result in
+
+            switch result {
+            case .success(let writer):
+                self?.writer = writer
+            case .failure(let error):
                 print("start recording with error \(error)")
             }
-        })
+        }
 
         guard let currentVideoBuffer = self.capturer?.currentVideoBuffer else { return }
 

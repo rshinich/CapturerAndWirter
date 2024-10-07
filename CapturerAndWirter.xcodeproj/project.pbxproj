@@ -19,6 +19,7 @@
 		9F9DF9E32CA0530200649E4F /* CameraSelectMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F9DF9E22CA0530200649E4F /* CameraSelectMenuItem.swift */; };
 		9FA5C3602CB3A8EA0042BB62 /* CapturerTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA5C35F2CB3A8EA0042BB62 /* CapturerTypes.swift */; };
 		9FA5C3642CB3B7E80042BB62 /* CapturerHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA5C3632CB3B7E80042BB62 /* CapturerHelpers.swift */; };
+		9FA5C3662CB411F60042BB62 /* WriterTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA5C3652CB411F60042BB62 /* WriterTypes.swift */; };
 		9FF72DCC2C98269F003B6EF6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72DCB2C98269F003B6EF6 /* AppDelegate.swift */; };
 		9FF72DCE2C98269F003B6EF6 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72DCD2C98269F003B6EF6 /* SceneDelegate.swift */; };
 		9FF72DD02C98269F003B6EF6 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF72DCF2C98269F003B6EF6 /* ViewController.swift */; };
@@ -63,6 +64,7 @@
 		9F9DF9E22CA0530200649E4F /* CameraSelectMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraSelectMenuItem.swift; sourceTree = "<group>"; };
 		9FA5C35F2CB3A8EA0042BB62 /* CapturerTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturerTypes.swift; sourceTree = "<group>"; };
 		9FA5C3632CB3B7E80042BB62 /* CapturerHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturerHelpers.swift; sourceTree = "<group>"; };
+		9FA5C3652CB411F60042BB62 /* WriterTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WriterTypes.swift; sourceTree = "<group>"; };
 		9FF72DC82C98269F003B6EF6 /* CapturerAndWirter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CapturerAndWirter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9FF72DCB2C98269F003B6EF6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9FF72DCD2C98269F003B6EF6 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -202,6 +204,7 @@
 			isa = PBXGroup;
 			children = (
 				9FF72E022C98841C003B6EF6 /* VideoWriter.swift */,
+				9FA5C3652CB411F60042BB62 /* WriterTypes.swift */,
 			);
 			path = VideoWriter;
 			sourceTree = "<group>";
@@ -358,6 +361,7 @@
 				9F9DF9DD2C9FFD8200649E4F /* CameraSelectButton.swift in Sources */,
 				9F9DF9E12CA0520B00649E4F /* CameraSelectMenuView.swift in Sources */,
 				9F9DF9D92C9FD0BF00649E4F /* RluerView.swift in Sources */,
+				9FA5C3662CB411F60042BB62 /* WriterTypes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -544,6 +548,7 @@
 				INFOPLIST_FILE = CapturerAndWirter/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Use camera to capturer";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Use microphone to capturer";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -575,6 +580,7 @@
 				INFOPLIST_FILE = CapturerAndWirter/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Use camera to capturer";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Use microphone to capturer";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
