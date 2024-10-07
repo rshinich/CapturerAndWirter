@@ -50,7 +50,9 @@ class Capturer: NSObject {
 
         let instance = Capturer()
 
-        instance.checkCameraAccess { cameraResult in
+        instance.checkCameraAccess { [weak instance] cameraResult in
+            guard let instance = instance else { return }
+
             switch cameraResult {
             case .success:
                 instance.checkMicrophoneAccess { micResult in
@@ -126,7 +128,7 @@ class Capturer: NSObject {
         case .denied:       completion(.failure(CapturerError.audioDeviceAccessDenied))
         case .notDetermined: do {
             self.sessionQueue.suspend()
-            AVCaptureDevice.requestAccess(for: .video) { granted in
+            AVCaptureDevice.requestAccess(for: .audio) { granted in
 
                 self.sessionQueue.resume()
 
@@ -400,7 +402,7 @@ class Capturer: NSObject {
     // MARK: - Device
     
     /// 切换摄像头，判断当前摄像头是前摄还是后摄，使用相反的摄像头
-    public func swicthingCamera() {
+    public func switchingCamera() {
 
         if self.videoCaptureDevice?.position == .back {
 
@@ -454,7 +456,7 @@ extension Capturer: AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAudio
             self.currentVideoBuffer = sampleBuffer
             self.onVideoSampleBuffer?(sampleBuffer)
 
-            self.calaulatorResAndFps(sampleBuffer: sampleBuffer)
+//            self.calaulatorResAndFps(sampleBuffer: sampleBuffer)
 
         } else if output == self.audioOutput {
 
@@ -488,7 +490,7 @@ extension Capturer: AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAudio
             let elapsed = CMTimeGetSeconds(currentTimestamp - lastTimestamp)
             if elapsed > 0 {
                 frameRate = 1.0 / elapsed
-                print(String(format: "[Calculator] 瞬时帧率: %.2f FPS", frameRate))
+//                print(String(format: "[Calculator] 瞬时帧率: %.2f FPS", frameRate))
             }
         }
 
