@@ -149,8 +149,10 @@ class CapturerViewController: UIViewController {
 
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(currentVideoBuffer) else { return }
 
+        // TODO: frameRate 从外部传入
         VideoWriter.create(outputURL: fullURL,
-                           videoSize: CGSize(width: CVPixelBufferGetWidth(pixelBuffer), height: CVPixelBufferGetHeight(pixelBuffer))) { [weak self] result in
+                           videoSize: CGSize(width: CVPixelBufferGetWidth(pixelBuffer), height: CVPixelBufferGetHeight(pixelBuffer)),
+                           frameRate: 120) { [weak self] result in
 
             switch result {
             case .success(let writer):
